@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  #loadbalancer:
+  #  image: traefik:v2.5
+  #  ports:
+  #    - "80:80"
+  webserver:
+    image: dai_http:latest
+    ports:
+      - "80:80"
+  #  deploy:
+  #    replicas: 5

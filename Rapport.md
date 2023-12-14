@@ -55,6 +55,8 @@ Les directives du fichier de configuration de base sont expliquées ci-dessous :
 - ```keepalive_timeout 65``` : délai d'attente maximum pour les connexions persistantes avec le client
 - ```include /etc/nginx/conf.d/*.conf``` : inclut tous les fichiers de configuration se terminant par ```.conf``` dans le répertoire spécifié
 
+### You have documented your configuration in your report.
+
 La configuration particulière du serveur virtuel HTTP est incluse dans la configuration de base de *nginx* via la dernière ligne du fichier ```etc/nginx/nginx.conf```. La configuration particulière se trouve le fichier ```/etc/nginx/conf.d/default.conf``` :
 ```
 server {
@@ -83,4 +85,37 @@ Les directives du fichier de configuration particulière sont expliquées ci-des
 - ```location = /50x.html { ... }``` : section définissant la configuration d'une directive de localisation pour */50x.html*
 - ```root /usr/share/nginx/html``` : répertoire où se trouve le fichier */50x.html*
 
-### You have documented your configuration in your report.
+## Step 2: Docker compose
+
+### You have documented your configuration in your report
+Le fichier ```Dockerfile``` permet de *dockeriser* le site HTTP. Le contenu de ce fichier est le suivant : 
+```
+FROM nginx
+COPY www /usr/share/nginx/html
+```
+La directive ```FROM nginx``` indique l'image de base pour la construction de la nouvelle image Docker (en l'occurrence l'image officielle de *Nginx*, disponible sur *Docker Hub*). 
+La directive ```COPY www /usr/share/nginx/html``` copie le contenu du répertoire local ```www``` dans le répertoire ```/usr/share/nginx/html``` de l'image Docker en cours de construction.
+
+Une fois l'image docker crée, il est possible de la lancer avec une configuration spécifiée à l'aide du fichier *docker-compose.yml* décrit ci-dessous :
+```
+version: '3.8'
+services:
+    #loadbalancer:
+    #  image: traefik:v2.5
+    #  ports:
+    #    - "80:80"
+    webserver:
+    image: dai_http:latest
+    ports:
+        - "80:80"
+    #  deploy:
+    #    replicas: 5
+```
+Les directives du fichier *docker-compose.yml* sont expliquées ci-dessous :
+- ```version: '3.8'``` : version de la syntaxe utilisée dans le fichier docker-compose.yml
+- ```services``` : section des services dans un fichier Docker Compose (i.e. conteneurs qui sont exécutés)
+- ```webserver````: nom du service à déclarer (i.e. un service appelé *webserver*)
+- ```image: dai_http:latest``` : nom de l'image Docker à utiliser pour ce service
+- ```ports: - "80:80"``` : mapping de ports entre le système hôte (à gauche) et le conteneur Docker (à droite)
+La mapping de port indique que les requêtes HTTP faites au port 80 de la machine hôte seront redirigées vers le port 80 du conteneur *webserver* (*dai_http* version la plus récente, dans le cas présent).
+les commentaires (préfixés par ```#```) indiquent la configuration possible d'un *load balancer* (voir plus loin).
