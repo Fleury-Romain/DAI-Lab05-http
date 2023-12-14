@@ -114,8 +114,14 @@ services:
 Les directives du fichier *docker-compose.yml* sont expliquées ci-dessous :
 - ```version: '3.8'``` : version de la syntaxe utilisée dans le fichier docker-compose.yml
 - ```services``` : section des services dans un fichier Docker Compose (i.e. conteneurs qui sont exécutés)
-- ```webserver````: nom du service à déclarer (i.e. un service appelé *webserver*)
+- ```webserver```: nom du service à déclarer (i.e. un service appelé *webserver*)
 - ```image: dai_http:latest``` : nom de l'image Docker à utiliser pour ce service
 - ```ports: - "80:80"``` : mapping de ports entre le système hôte (à gauche) et le conteneur Docker (à droite)
 La mapping de port indique que les requêtes HTTP faites au port 80 de la machine hôte seront redirigées vers le port 80 du conteneur *webserver* (*dai_http* version la plus récente, dans le cas présent).
 les commentaires (préfixés par ```#```) indiquent la configuration possible d'un *load balancer* (voir plus loin).
+
+En lançant la commande ```docker compose up -d``` (avec ```-d``` pour le mode *détaché*), on lance le serveur HTTP sur le port 80 de la machine locale.
+Dans un navigateur, en tappant l'adresse ```localhost:80```, on trouve le contenu de la page statique (page *index.html*), comme le montre la copie d'écran ci-dessous :
+
+![copie_ecran_server_running](images/server_running.png)
+
