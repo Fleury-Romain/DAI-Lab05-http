@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HTTPServer {
-    private static List<String> items = new ArrayList<>();
+    private static List<Person> items = new ArrayList<>();
     public static void main(String[] args) {
         Javalin app = Javalin.create().start(7000);
 
@@ -14,7 +14,8 @@ public class HTTPServer {
         // Create
         app.post("/items", ctx-> {
             String newItem = ctx.body();
-            items.add(newItem);
+            String[] persons = newItem.split(",");
+            items.add(new Person(persons[0], persons[1], Integer.parseInt(persons[2]), persons[3])); // arguments du constructeur
             ctx.status(201).result("Item added");
         });
 
@@ -27,8 +28,10 @@ public class HTTPServer {
             int index = Integer.parseInt(ctx.pathParam("index"));
             System.out.println("Receive index : " + index);
             if (index >= 0 && index < items.size()) {
+                Person person = items.get(index);
                 String updatedItem = ctx.body();
-                items.set(index, updatedItem);
+                person.setJob(updatedItem);
+                items.set(index, person);
                 ctx.result("Item updated");
             } else {
                 ctx.status(404).result("Item not found");
@@ -39,12 +42,12 @@ public class HTTPServer {
         app.delete("/items/{index}", ctx -> {
             int index = Integer.parseInt(ctx.pathParam("index"));
             ctx.result(ctx.pathParam("index"));
-            /*if (index >= 0 && index < items.size()) {
+            if (index >= 0 && index < items.size()) {
                 items.remove(index);
                 ctx.result("Item deleted");
             } else {
                 ctx.status(404).result("Item not found");
-            }*/
+            }
         });
 
 
