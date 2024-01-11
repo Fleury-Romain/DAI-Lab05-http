@@ -1,0 +1,8 @@
+FROM openjdk:latest
+
+WORKDIR /app
+
+# Assuming the JAR file is named app.jar, replace it with the actual name if different
+COPY ./code/target/HTTPServer-1.0.jar .
+
+CMD ["java", "-jar", "HTTPServer-1.0.jar"]

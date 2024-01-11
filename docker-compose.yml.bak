@@ -1,0 +1,18 @@
+version: '4'
+services:
+  reverse_proxy:
+    image: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  webserver:
+    image: jbr_rfy_nginx
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.webserver.rule=Host(`maison.com`)"
