@@ -1,0 +1,18 @@
+meta {
+  name: add_pets
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:7000/api/pets
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Mike",
+    "energy": 100
+  }
+}

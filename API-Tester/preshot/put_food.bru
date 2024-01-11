@@ -1,0 +1,17 @@
+meta {
+  name: put_food
+  type: http
+  seq: 3
+}
+
+put {
+  url: http://localhost:7000/api/pets/Charlie
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "food": 10.0
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Dai-Lab05-http",
+  "type": "collection",
+  "presets": {
+    "requestType": "http",
+    "requestUrl": "http://localhost:7000"
+  }
+}
