@@ -1,27 +1,33 @@
 package ch.heig.dai.lab.http;
 
 public class Person {
-    String firstname;
-    String lastname;
-    int age;
-    String job;
-    public Person(String firstname, String lastname, int age, String job) {
+    private String firstname;
+    private String lastname;
+    private int birthyear;
+    private String job;
+    private static int count;
+    private final int id;
+    public Person(String firstname, String lastname, int birthyear, String job) {
         this.firstname = firstname;
-        this.lastname = lastname;
-        this.age = age;
-        this.job = job;
+        this.lastname  = lastname;
+        this.birthyear = birthyear;
+        this.job       = job;
+        this.id        = count++;
     }
 
     public String toString() {
-        String ageString = String.valueOf(age);
-        if (age > 50) {
-            ageString = "age canonique";
-        }
-        return "{" + firstname + ", " + lastname + ", " + ageString + ", " + job + "}";
+        return "[id:" + id + ", fname:" + firstname + ", lname:" + lastname + ", birthyear:" + birthyear + ", job:" + job + "]";
     }
 
-    public void setJob(String job) {
-        this.job = job;
+    public int getId() { return id; }
+
+    public static void deleteId() { --count; }
+
+    public static void resetId() { count = 0; }
+
+    boolean equals(Person p) {
+        return this == p || this.firstname.equals(p.firstname) && this.lastname.equals(p.lastname) && this.birthyear == p.birthyear && this.job.equals(p.job);
     }
 
+    public void setJob(String job) { this.job = job; }
 }
