@@ -1,6 +1,5 @@
 providers:
   docker:
-    endpoint: "tcp://localhost:2376"
     exposedByDefault: false
 
 entryPoints:
@@ -25,3 +24,12 @@ tls:
   certificates:
     - certFile: "DAI-SSL/localhost.crt"
       keyFile: "DAI-SSL/localhost.key"
+      
+certificatesResolvers:
+  myresolver:
+    acme:
+        email: romain.fleury@heig-vd.ch
+        storage: /etc/traefik/certificates
+        caServer: "https://acme-v02.api.letsencrypt.org/directory"
+        httpChallenge:
+            entryPoint: http
