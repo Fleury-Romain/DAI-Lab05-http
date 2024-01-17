@@ -1,0 +1,2 @@
+docker-compose up -d --scale nginx=5 --scale api=5
+

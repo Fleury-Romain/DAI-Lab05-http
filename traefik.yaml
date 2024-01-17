@@ -1,0 +1,27 @@
+providers:
+  docker:
+    endpoint: "tcp://localhost:2376"
+    exposedByDefault: false
+
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+
+api:
+  insecure: true
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      sniStrict: true
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+
+  certificates:
+    - certFile: "DAI-SSL/localhost.crt"
+      keyFile: "DAI-SSL/localhost.key"
