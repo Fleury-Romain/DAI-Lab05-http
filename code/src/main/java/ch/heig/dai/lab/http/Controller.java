@@ -121,8 +121,8 @@ class Controller {
         }
     }
     public void delete(Context ctx) {
-        String s = ctx.pathParam("id");
-        if (s.equals("all") || s.equals("ALL") || s.equals("All")) {
+        String s = ctx.pathParam("id").toLowerCase();
+        if (s.equals("all")) {
             if (persons.isEmpty()) {
                 ctx.result("List already empty");
                 return;
@@ -137,7 +137,6 @@ class Controller {
             int i;
             for (i = 0; i < persons.size(); i++) {
                 if (persons.get(i).getId() == id) {
-                    Person.deleteId();
                     persons.remove(i);
                     ctx.result("Person (id: " + id + ") deleted");
                     return;
