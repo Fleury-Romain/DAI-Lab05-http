@@ -22,7 +22,7 @@ services:
     restart: always
     scale: 3
     volumes:
-      - ./www:/usr/share/nginx/html
+      - ./Ressources/www:/usr/share/nginx/html
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nginx.rule=Host(`localhost`)"
