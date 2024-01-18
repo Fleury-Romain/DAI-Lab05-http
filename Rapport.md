@@ -2,7 +2,6 @@
 
 ### Romain Fleury, Dr. Ing. Julien Billeter
 
-
 ## Etape 0: Dépôt GitHub
 
 Pour ce projet, nous avons créé un dépôt GitHub avec un fichier *README.md*. Nous avons documenté notre projet dans le fichier *Rapport.md*.
@@ -13,7 +12,7 @@ Nous avons créé un répertoire séparé pour notre serveur Web statique, ainsi
 
 Nous avons configuré le fichier ```nginx.conf``` pour servir le contenu statique du site sur le port 80. Il est ainsi possible de lancer l'image et d'accéder au contenu statique du site depuis un navigateur.
 
-La configuration de base de *nginx* se trouve dans ```etc/nginx/nginx.conf```, dont le contenu est le suivant :
+La configuration de base de *nginx* se trouve dans `etc/nginx/nginx.conf`, dont le contenu est le suivant :
 ```
 user              nginx;
 worker_processes  auto;
@@ -61,7 +60,7 @@ Les directives du fichier de configuration de base sont expliquées ci-dessous :
 - ```keepalive_timeout 65``` : délai d'attente maximum pour les connexions persistantes avec le client
 - ```include /etc/nginx/conf.d/*.conf``` : inclut tous les fichiers de configuration se terminant par ```.conf``` dans le répertoire spécifié
 
-La configuration particulière du serveur virtuel HTTP est incluse dans la configuration de base de *nginx* via la dernière ligne du fichier ```etc/nginx/nginx.conf```. La configuration particulière se trouve le fichier ```/etc/nginx/conf.d/default.conf``` :
+La configuration particulière du serveur virtuel HTTP est incluse dans la configuration de base de *nginx* via la dernière ligne du fichier `etc/nginx/nginx.conf`. La configuration particulière se trouve le fichier `/etc/nginx/conf.d/default.conf` :
 ```
 server {
 listen       80;
@@ -97,93 +96,21 @@ De plus, il est possible de construire les images définies dans le fichier `doc
 Le contenu du fichier `docker-compose.yml` est le suivant :
 ```
 version: '3.8'
-
 services:
-
-  # Traefik Reverse Proxy
-  traefik:
-    image: traefik:v2.5
-    container_name: traefik
-    restart: always
-    ports:
-      - "80:80"
-      - "8080:8080"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./Ressources/traefik.yaml:/etc/traefik/traefik.yaml
-      - ./Ressources/DAI-SSL:/etc/traefik/certificates 
-
-  # Static Web Server with Nginx
-  nginx:
-    image: nginx:latest
-    restart: always
-    scale: 3
-    volumes:
-      - ./Ressources/www:/usr/share/nginx/html
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.nginx.rule=Host(`localhost`)"
-      - "traefik.http.routers.nginx.entrypoints=https"
-      - "traefik.http.routers.nginx.tls=true"
-    expose:
-      - "80"
-  # Dynamic API Server with Javalin
-  api:
-    build:
-      dockerfile: Ressources/Dockerfile-api
-      context: ./
-    restart: always
-    expose:
-      - "7000"
-    scale: 3
-    labels:
-     - "traefik.enable=true"
-     - "traefik.http.routers.api.rule=Host(`localhost`) && PathPrefix(`/api/`)"
-     - "traefik.http.routers.api.service=api"
-     - "traefik.http.routers.api.entrypoints=https"    
-     - "traefik.http.routers.api.tls=true"
-     - "traefik.http.services.api.loadbalancer.sticky=true" 
-
-     - "traefik.http.middlewares.api-stripprefix.stripprefix.prefixes=/api"
-     - "traefik.http.middlewares.api.stripprefix.forceSlash=false"
-     - "traefik.http.routers.api.middlewares=api-stripprefix"
-```
-
-Le fichier ```Dockerfile``` permet de *dockeriser* le site HTTP. Le contenu de ce fichier est le suivant : 
-```
-FROM nginx
-COPY www /usr/share/nginx/html
-```
-La directive ```FROM nginx``` indique l'image de base pour la construction de la nouvelle image Docker (en l'occurrence l'image officielle de *Nginx*, disponible sur *Docker Hub*). 
-La directive ```COPY www /usr/share/nginx/html``` copie le contenu du répertoire local ```www``` dans le répertoire ```/usr/share/nginx/html``` de l'image Docker en cours de construction.
-
-Une fois l'image docker crée, il est possible de la lancer avec une configuration spécifiée à l'aide du fichier *docker-compose.yml* décrit ci-dessous :
-```
-version: '3.8'
-services:
-    #loadbalancer:
-    #  image: traefik:v2.5
-    #  ports:
-    #    - "80:80"
     webserver:
     image: dai_http:latest
     ports:
         - "80:80"
-    #  deploy:
-    #    replicas: 5
 ```
 Les directives du fichier *docker-compose.yml* sont expliquées ci-dessous :
-- ```version: '3.8'``` : version de la syntaxe utilisée dans le fichier docker-compose.yml
-- ```services``` : section des services dans un fichier Docker Compose (i.e. conteneurs qui sont exécutés)
-- ```webserver```: nom du service à déclarer (i.e. un service appelé *webserver*)
-- ```image: dai_http:latest``` : nom de l'image Docker à utiliser pour ce service
-- ```ports: - "80:80"``` : mapping de ports entre le système hôte (à gauche) et le conteneur Docker (à droite)
-La mapping de port indique que les requêtes HTTP faites au port 80 de la machine hôte seront redirigées vers le port 80 du conteneur *webserver* (*dai_http* version la plus récente, dans le cas présent).
-les commentaires (préfixés par ```#```) indiquent la configuration possible d'un *load balancer* (voir plus loin).
+- `version: '3.8'` : version de la syntaxe utilisée dans le fichier docker-compose.yml
+- `services` : section des services dans un fichier Docker Compose (i.e. conteneurs qui sont exécutés)
+- `webserver`: nom du service à déclarer (i.e. un service appelé *webserver*)
+- `image: dai_http:latest` : nom de l'image Docker à utiliser pour ce service
+- `ports: - "80:80"` : mapping de ports entre le système hôte (à gauche) et le conteneur Docker (à droite); la mapping de port indique que les requêtes HTTP faites au port 80 de la machine hôte seront redirigées vers le port 80 du conteneur *webserver* (*dai_http* version la plus récente, dans le cas présent).
 
-En lançant la commande ```docker compose up -d``` (avec ```-d``` pour le mode *détaché*), on lance le serveur HTTP sur le port 80 de la machine locale.
-Dans un navigateur, en tappant l'adresse ```localhost:80```, on trouve le contenu de la page statique (page *index.html*), comme le montre la copie d'écran ci-dessous :
+En lançant la commande `docker compose up -d` (avec `-d` pour le mode *détaché*), on lance le serveur HTTP sur le port 80 de la machine locale.
+Dans un navigateur, en tappant l'adresse `localhost:80`, on trouve le contenu de la page statique (page *index.html*), comme le montre la copie d'écran ci-dessous :
 
 ## Etape 3: API du serveur HTTP
 Nous avons développé une API (Application Programming Interface) supportant toutes les opérations CRUD (Create Read Update Delete).
@@ -234,9 +161,93 @@ Un proxy inverse, tel que Traefik, est utile pour améliorer la sécurité d'une
 - Gestion fine des autorisations : un proxy inverse peut être utilisé pour définir des règles d'accès et de contrôle d'accès basées sur des adresses IP, des en-têtes HTTP, ou d'autres critères ; cela offre une gestion fine des autorisations et permet de limiter l'accès à certaines parties de l'infrastructure.
 - Séparation des services : un proxy inverse peut être configuré pour diriger le trafic vers des services spécifiques en fonction des règles définies, permettant de séparer les services et d'appliquer des politiques de sécurité différenciées en fonction des besoins.
 
-# A FAIRE :
-- Vous êtes capable d'expliquer dans la documentation comment accéder au tableau de bord de Traefik et comment il fonctionne.
----
+Pour accéder au tableau de bord Traefik, il est nécessaire d'avoir dans le fichier `docker-compose.yml` les lignes suivantes sous `services: traefik:` :
+- `command: - "--api.dashboard=true"` : active le tableau de bord
+- `ports: - "8080:8080"` : port pour accéder au tableau de bord
+
+Grâce au tableau de bord de Traefik, on peut accéder aux informations suivantes :
+- Vue d'ensemble : vue d'ensemble des services, des routes, des middlewares et d'autres configurations associées à l'infrastructure.
+- Statistiques en temps réel : statistiques en temps réel sur le trafic, les requêtes par seconde, les codes de réponse HTTP, etc...
+- Gestion des configurations : visualisation et gestion des configurations, y compris les routes, les services, et d'autres paramètres.
+- Accès aux journaux : accès aux journaux (pour le débogage et la surveillance).
+- Sécurité : il est recommandé de configurer l'authentification pour sécuriser l'accès au tableau de bord.
+
+Le contenu du fichier `Dockerfile-api` pour la conteneurisation (dockerisation) de l'API est le suivant :
+```
+FROM openjdk:latest
+WORKDIR /app
+COPY ../code/target/HTTPServer-1.0.jar .
+CMD ["java", "-jar", "HTTPServer-1.0.jar"]
+```
+
+Le fichier `docker-compose.yml` est modifié comme suit :
+```
+version: '3.8'
+
+services:
+
+  # Traefik Reverse Proxy
+  traefik:
+    image: traefik:v2.5
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # Static Web Server with Nginx
+  nginx:
+    image: nginx:latest
+    restart: always
+    volumes:
+      - ./Ressources/www:/usr/share/nginx/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=Host(`localhost`)"
+    expose:
+      - "80"
+  # Dynamic API Server with Javalin
+  api:
+    build:
+      dockerfile: Ressources/Dockerfile-api
+      context: ./
+    restart: always
+    expose:
+      - "7000"
+    labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.api.rule=Host(`localhost`) && PathPrefix(`/api/`)"
+     - "traefik.http.routers.api.service=api"
+     - "traefik.http.middlewares.api-stripprefix.stripprefix.prefixes=/api"
+     - "traefik.http.middlewares.api.stripprefix.forceSlash=false"
+     - "traefik.http.routers.api.middlewares=api-stripprefix"
+```
+
+Durant notre présentation, nous serons heureux de vous guider à travers la configuration et vous faire une démonstration pour vous montrer que nous pouvons démarrer l'infrastructure avec 3 conteneurs (serveur statique, serveur dynamique, et proxy inverse) en partant d'un environnement Docker vide et en utilisant docker compose, accéder à chaque serveur à partir d'un navigateur, et prouver que le routage est effectué correctement par le proxy inverse.
+
+## Etape 5: Scalability et répartition de charge
+
+Nous pouvons utiliser docker compose pour démarrer l'infrastructure avec plusieurs instances de chaque serveur (statique et dynamique), et ajouter/supprimer dynamiquement des instances de chaque serveur.
+
+Il convient de modifier le fichier `docker-compose.yml` pour ajouter les champs suivants : 
+- `services: nginx: deploy: replicas: 3` et
+- `services: api: deploy: replicas: 3`.
+
+Durant notre présentation, nous serons heureux de vous faire une démonstration pour montrer que Traefik effectue un équilibrage de charge entre les instances, et que si l'on ajoute/supprime des instances, la répartition de charge est dynamiquement mise à jour en utilisant les instances disponibles.
+
+## Etape 6: Repartition de charge par Round-Robin et Sticky Sessions
+
+Il faut modifier le fichier `docker-compose.yml` en ajoutant le champ `services: api: labels: - "traefik.http.services.api.loadbalancer.sticky=true"`. Repartition de charge par Round-Robin est activée par défaut.
+
+Pour vérifier la fonctionnalité de la sessions collante, il suffit de se connecter à l'API (via `http://localhost/api/`) via un navigateur, et d'aller inspecter les cookies stockés. Malheureusement, aucun cookie n'est renvoyé au navigateur.
+
+Durant notre présentation, nous serons heureux de vous faire une démonstration pour montrer que notre répartiteur de charge peut distribuer des requêtes HTTP de manière round-robin aux noeuds de serveurs statiques sans état, et qu'il ne gère pas des sessions collantes lorsqu'il transmet des requêtes HTTP aux noeuds de serveurs dynamiques.
+
+## Etape 7: Sécurisation de Traefik par le protocole HTTPS
+
+Des certificats ont été générés par *OpenSSL* avec la commande `openssl req -x509 -nodes -newkey rsa:2048 -keyout localhost.key -out localhost.crt -days 365`.
 
 La configuration du Proxy inverse Traefik est située dans le fichier `traefik.yaml` dont le contenu est donnée ci-dessous :
 ```
@@ -274,7 +285,7 @@ certificatesResolvers:
         storage: /etc/traefik/certificates
         caServer: "https://acme-v02.api.letsencrypt.org/directory"
 ```
-Les directives du fichier *traefik.yaml* sont expliquées ci-dessous :
+Les directives du fichier `traefik.yaml` sont expliquées ci-dessous :
 
 - `api: insecure: true` : activation de l'API de Traefik de manière non sécurisée (sans authentification, utile pour le développement ou les tests, mais pas recommandé en production en raison de problèmes de sécurité)
 - `entryPoints` : définition des points d'entrée pour le trafic (un point d'entrée pour le trafic HTTP sur le port 80, et un autre pour le trafic HTTPS sur le port 443)
@@ -283,48 +294,67 @@ Les directives du fichier *traefik.yaml* sont expliquées ci-dessous :
 - `tls: certificates:` : chemin vers le fichier du certificat SSL (`certFile:` localhost.crt) et la clé privée associée (`keyFile:` localhost.key) utilisés pour configurer le support SSL/TLS
 - `certificatesResolvers: myresolver: acme:` : configuration d'un résolveur de certificats utilisant le protocole ACME (`email:` spécifie l'adresse e-mail associée à l'enregistrement ACME, `storage:` définit le répertoire de stockage pour les certificats, et `caServer:` indique l'URL du serveur ACME (Let's Encrypt ici)
 
-Durant notre présentation, nous serons heureux de vous guider à travers la configuration et vous faire une démonstration pour vous montrer que nous pouvons démarrer l'infrastructure avec 3 conteneurs (serveur statique, serveur dynamique, et proxy inverse) en partant d'un environnement Docker vide et en utilisant docker compose, accéder à chaque serveur à partir d'un navigateur, et prouver que le routage est effectué correctement par le proxy inverse.
+Les *Entrypoints* ont été créés dans `traefik.yaml` et dans le fichier `docker-compose.yml` on indique quel service utilise quel *Entrypoint*.
 
-## Etape 5: Scalability et répartition de charge
+La version finale du fichier `docker-compose.yml` est le suivant
+```
+version: '3.8'
 
-Nous pouvons utiliser docker compose pour démarrer l'infrastructure avec plusieurs instances de chaque serveur (statique et dynamique), et ajouter/supprimer dynamiquement des instances de chaque serveur.
+services:
 
-# A FAIRE : DOCUMENTER LA CONFIGURATION !
+  # Traefik Reverse Proxy
+  traefik:
+    image: traefik:v2.5
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./Ressources/traefik.yaml:/etc/traefik/traefik.yaml
+      - ./Ressources/DAI-SSL:/etc/traefik/certificates
 
-Durant notre présentation, nous serons heureux de vous pouvez faire une démonstration pour montrer que Traefik effectue un équilibrage de charge entre les instances, et que si l'on ajoute/supprime des instances, la répartition de charge est dynamiquement mise à jour en utilisant les instances disponibles.
-
-## Etape 6: Repartition de charge par Round-Robin et Sticky Sessions
-
-# A FAIRE :
-- Vous effectuez une configuration pour démontrer la notion de session collante.
-- Vous avez documenté votre configuration et votre procédure de validation dans votre rapport.
----
-
-Durant notre présentation, nous serons heureux de vous faire une démonstration pour montrer que notre répartiteur de charge peut distribuer des requêtes HTTP de manière round-robin aux noeuds de serveurs statiques sans état, et qu'il gère des sessions collantes lorsqu'il transmet des requêtes HTTP aux noeuds de serveurs dynamiques.
-
-
-## Etape 7: Sécurisation de Traefik par le protocole HTTPS
-
-# A FAIRE :
-- Vous avez documenté votre configuration dans votre rapport.
----
+  # Static Web Server with Nginx
+  nginx:
+    image: nginx:latest
+    restart: always
+    deploy:
+      replicas: 3
+    volumes:
+      - ./Ressources/www:/usr/share/nginx/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=Host(`localhost`)"
+      - "traefik.http.routers.nginx.entrypoints=https"
+      - "traefik.http.routers.nginx.tls=true"
+    expose:
+      - "80"
+  # Dynamic API Server with Javalin
+  api:
+    build:
+      dockerfile: Ressources/Dockerfile-api
+      context: ./
+    restart: always
+    expose:
+      - "7000"
+    deploy:
+      replicas: 3
+    labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.api.rule=Host(`localhost`) && PathPrefix(`/api/`)"
+     - "traefik.http.routers.api.service=api"
+     - "traefik.http.routers.api.entrypoints=https"    
+     - "traefik.http.routers.api.tls=true"
+     - "traefik.http.services.api.loadbalancer.sticky=true"
+     - "traefik.http.middlewares.api-stripprefix.stripprefix.prefixes=/api"
+     - "traefik.http.middlewares.api.stripprefix.forceSlash=false"
+     - "traefik.http.routers.api.middlewares=api-stripprefix"
+```
+A la fin de cette étapes, les deux services utilisent l'*Entrypoint* HTTPS (port 443).
 
 Durant notre présentation, nous serons heureux de vous faire une démonstration pour montrer que les serveurs statiques et dynamiques sont accessibles via HTTPS
 
 ## Etapes optionnelles
 Nous n'avons malheureusement pas eu le temps de faire d'étapes optionnelles.
-
-Le contenu du fichier *Dockerfile-api* est le suivant :
-```
-FROM openjdk:latest
-
-WORKDIR /app
-
-COPY ../code/target/HTTPServer-1.0.jar .
-
-CMD ["java", "-jar", "HTTPServer-1.0.jar"]
-```
-
-
-![copie_ecran_server_running](images/server_running.png)
-
