@@ -2,6 +2,6 @@ FROM openjdk:latest
 
 WORKDIR /app
 
-COPY ./code/target/HTTPServer-1.0.jar .
+COPY ../code/target/HTTPServer-1.0.jar .
 
 CMD ["java", "-jar", "HTTPServer-1.0.jar"]

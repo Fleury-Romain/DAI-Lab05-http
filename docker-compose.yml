@@ -13,8 +13,8 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik.yaml:/etc/traefik/traefik.yaml
-      - ./DAI-SSL:/etc/traefik/certificates 
+      - ./Ressources/traefik.yaml:/etc/traefik/traefik.yaml
+      - ./Ressources/DAI-SSL:/etc/traefik/certificates 
 
   # Static Web Server with Nginx
   nginx:
@@ -33,7 +33,8 @@ services:
   # Dynamic API Server with Javalin
   api:
     build:
-      dockerfile: Dockerfile-api
+      dockerfile: Ressources/Dockerfile-api
+      context: ./
     restart: always
     expose:
       - "7000"
