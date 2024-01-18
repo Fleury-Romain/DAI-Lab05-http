@@ -137,7 +137,6 @@ class Controller {
             int i;
             for (i = 0; i < persons.size(); i++) {
                 if (persons.get(i).getId() == id) {
-                    Person.deleteId();
                     persons.remove(i);
                     ctx.result("Person (id: " + id + ") deleted");
                     return;
