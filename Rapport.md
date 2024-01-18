@@ -8,11 +8,15 @@ Pour ce projet, nous avons créé un dépôt GitHub avec un fichier *README.md*.
 
 ## Etape 1: Site web statique
 
-Nous avons créé un répertoire séparé pour notre serveur Web statique, ainsi qu'un fichier Dockerfile nommé *Dockerfile-api* basé une image *nging* qui permet de construire une image Docker.
+Nous avons créé un répertoire séparé pour notre serveur Web statique, ainsi qu'un fichier Dockerfile nommé *Dockerfile* basé une image *nginx* qui permet de construire une image Docker.
+```
+FROM nginx:latest
+COPY ./Ressources/www /usr/share/nginx/html 
+```
 
 Nous avons configuré le fichier ```nginx.conf``` pour servir le contenu statique du site sur le port 80. Il est ainsi possible de lancer l'image et d'accéder au contenu statique du site depuis un navigateur.
 
-La configuration de base de *nginx* se trouve dans `etc/nginx/nginx.conf`, dont le contenu est le suivant :
+La configuration de base de *nginx* se trouve dans `etc/nginx/nginx.conf` à l'intérieur du container Docker, dont le contenu est le suivant :
 ```
 user              nginx;
 worker_processes  auto;
