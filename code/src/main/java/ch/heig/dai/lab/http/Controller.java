@@ -48,7 +48,7 @@ class Controller {
                 }
             }
             persons.add(pnew);
-            ctx.result("Person created, id: " + persons.getLast().getId());
+            ctx.result("Person created, id: " + persons.get(persons.size()-1).getId());
         } catch (Exception e) {
             ctx.status(404).result("Invalid body");
         }

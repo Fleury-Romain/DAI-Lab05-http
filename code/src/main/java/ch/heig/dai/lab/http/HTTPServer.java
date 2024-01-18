@@ -25,6 +25,5 @@ public class HTTPServer {
 
         // Delete a person by id
         app.delete("/person/{id}", controller::delete);
-
     }
 }

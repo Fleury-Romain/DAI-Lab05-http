@@ -1,15 +1,15 @@
-providers:
-  docker:
-    exposedByDefault: false
-
+api:
+  insecure: true
+  
 entryPoints:
   http:
     address: ":80"
   https:
     address: ":443"
 
-api:
-  insecure: true
+providers:
+    docker:
+        exposedByDefault: false
 
 tls:
   options:
@@ -22,7 +22,7 @@ tls:
         - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
 
   certificates:
-    - certFile: "DAI-SSL/localhost.crt"
+      certFile: "DAI-SSL/localhost.crt"
       keyFile: "DAI-SSL/localhost.key"
       
 certificatesResolvers:
@@ -31,5 +31,3 @@ certificatesResolvers:
         email: romain.fleury@heig-vd.ch
         storage: /etc/traefik/certificates
         caServer: "https://acme-v02.api.letsencrypt.org/directory"
-        httpChallenge:
-            entryPoint: http
